@@ -6,6 +6,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:fyp/screens/cart_fav_provider.dart';
 import 'package:fyp/utils/food_menu.dart';
+import 'package:fyp/voice_assistant/widgets/voice_assistant_wrapper.dart';
 
 Future<void> main() async {
   final WidgetsBinding widgetsBining =
@@ -36,7 +37,9 @@ class VoiceGrocery extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Splashscreen(), // Your splash screen as the initial screen
+        home: VoiceAssistantWrapper(
+          child: Splashscreen(), // Your splash screen as the initial screen
+        ),
       ),
     );
   }

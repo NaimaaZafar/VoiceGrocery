@@ -50,6 +50,15 @@ dependencies:
   sqflite: ^2.4.1
   intl: ^0.20.1
   flutter_credit_card: ^4.0.1
+  # Voice assistant packages
+  speech_to_text: ^6.6.0
+  flutter_tts: ^3.8.5
+  avatar_glow: ^3.0.0
+  http: ^1.2.0
+  flutter_chat_types: ^3.6.2
+  permission_handler: ^11.3.0
+  # For dialog state management
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:
