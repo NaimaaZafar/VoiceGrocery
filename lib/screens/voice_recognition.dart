@@ -18,6 +18,7 @@ import 'package:fyp/screens/category.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:fyp/screens/search.dart';
+import 'package:fyp/screens/cart_fav_provider.dart';
 
 class VoiceRecognitionScreen extends StatefulWidget {
   const VoiceRecognitionScreen({super.key});
@@ -251,13 +252,39 @@ class _VoiceRecognitionScreenState extends State<VoiceRecognitionScreen> {
         
         // Extract language if available
         if (data.containsKey('language')) {
-          _languageCode = data['language'];
+          final detectedLang = data['language'].toString().toLowerCase();
+          
+          // Normalize language codes
+          if (detectedLang == 'ur' || detectedLang == 'urdu' || 
+              detectedLang.contains('urdu')) {
+            // If Urdu is detected, use 'ur' code
+            _languageCode = 'ur';
+          } else if (detectedLang == 'hi' || detectedLang == 'hindi' || 
+                    detectedLang.contains('hindi') || 
+                    detectedLang.contains('hind')) {
+            // If Hindi is detected, use 'hi' code
+            _languageCode = 'hi';
+            
+            // Print debug info for Hindi detection
+            print("Hindi detected! Using code: hi");
+          } else if (detectedLang == 'pa' || detectedLang == 'punjabi' || 
+                    detectedLang.contains('punjabi') || 
+                    detectedLang.contains('panjabi')) {
+            _languageCode = 'pa';
+          } else if (detectedLang.startsWith('en') || 
+                    detectedLang == 'english' || 
+                    detectedLang.contains('english')) {
+            _languageCode = 'en';
+          } else {
+            // Default fallback
+            _languageCode = detectedLang;
+          }
           
           // Map language code to full name for display
           final Map<String, String> languageNames = {
             'en': 'English',
             'ur': 'Urdu',
-            'hi': 'Hindi', // Sometimes Urdu might be detected as Hindi
+            'hi': 'Hindi',
             'pa': 'Punjabi',
           };
           
@@ -267,8 +294,16 @@ class _VoiceRecognitionScreenState extends State<VoiceRecognitionScreen> {
           print("Detected language code: $_languageCode");
           print("Detected language name: $_detectedLanguage");
           
-          // Set TTS language
-          await _ttsService.setLanguage(_languageCode);
+          // Use direct speak with language rather than setLanguage for reliability
+          // await _ttsService.setLanguage(_languageCode);
+          
+          // Try speaking a test message to ensure TTS is working with this language
+          if (_languageCode == 'hi' || _languageCode == 'ur') {
+            // This forces the TTS engine to configure Hindi correctly
+            await _ttsService.speakWithLanguage("परीक्षण", _languageCode);
+            await Future.delayed(Duration(milliseconds: 500));
+            await _ttsService.stop();
+          }
           
           // Verify that language is properly set with debug message
           print("Language set for TTS: ${_ttsService.currentLanguage}");
@@ -341,9 +376,10 @@ The user may speak in English or Urdu but your response should be in English. Re
 4) remove item(s) from cart
 5) add a review for an item
 6) favorite an item
+7) checkout items in cart
 
 Return ONLY a valid JSON object with:
-- "intent" field (one of: "add_to_cart", "search", "go_to_cart", "remove_from_cart", "add_review","favorite" or "unknown")
+- "intent" field (one of: "add_to_cart", "search", "go_to_cart", "remove_from_cart", "add_review", "favorite", "checkout" or "unknown")
 - "items" array containing any item names mentioned, ALWAYS TRANSLATED TO ENGLISH regardless of the language spoken
 
 Examples:
@@ -361,6 +397,10 @@ English: "I want to favorite apples" → {"intent": "favorite", "items": ["apple
 English: "Add chicken to my favorites" → {"intent": "favorite", "items": ["chicken"]}
 Urdu: "میں سیب کو پسندیدہ کرنا چاہتا ہوں" → {"intent": "favorite", "items": ["apple"]}
 Urdu: "مرغی کو میرے پسندیدہ میں شامل کریں" → {"intent": "favorite", "items": ["chicken"]}
+English: "I want to checkout my cart" → {"intent": "checkout", "items": []}
+English: "Proceed to checkout" → {"intent": "checkout", "items": []}
+Urdu: "میں چیک آؤٹ کرنا چاہتا ہوں" → {"intent": "checkout", "items": []}
+Urdu: "ادائیگی کے لیے آگے بڑھیں" → {"intent": "checkout", "items": []}
 
 Common grocery items in Urdu and their English translations:
 - سیب = apple
@@ -410,7 +450,7 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
               }
               
               // Handle navigation based on intent
-              _handleIntentNavigation();
+              _handleIntent();
             }
           });
         } catch (e) {
@@ -497,6 +537,12 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
                 textToCheck.contains('heart') ||
                 textToCheck.contains('save') && textToCheck.contains('item')) {
         intent = 'favorite';
+      } else if (textToCheck.contains('checkout') || 
+                textToCheck.contains('proceed') || 
+                textToCheck.contains('pay') ||
+                textToCheck.contains('purchase') || 
+                textToCheck.contains('buy now')) {
+        intent = 'checkout';
       }
       
       // Try to extract items using regex
@@ -518,7 +564,7 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
         _detectedItems = items;
         
         // Handle navigation based on intent
-        _handleIntentNavigation();
+        _handleIntent();
       });
     } catch (e) {
       setState(() {
@@ -529,15 +575,23 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
     }
   }
 
-  // Handle navigation based on detected intent
-  void _handleIntentNavigation() {
-    // Speak response based on intent
+  // Handle the intent with appropriate navigation
+  void _handleIntent() {
+    setState(() {
+      _isProcessing = false;
+    });
+
+    if (_detectedIntent.isEmpty || _detectedIntent == 'unknown') {
+      return;
+    }
+
+    // Speak the appropriate response
     switch (_detectedIntent) {
-      case 'add_to_cart':
-        _speak('add_to_cart_success');
-        break;
       case 'search':
         _speak('search_starting');
+        break;
+      case 'add_to_cart':
+        _speak('add_to_cart_success');
         break;
       case 'go_to_cart':
         _speak('go_to_cart');
@@ -551,35 +605,18 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
       case 'favorite':
         _speak('favorite_starting');
         break;
-      default:
-        _speak('command_not_understood');
+      case 'checkout':
+        _speak('checkout_starting');
         break;
     }
-    
-    // Add a slightly longer delay to allow speech to complete before navigating
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      
+
+    // Wait for TTS to complete before navigating
+    Future.delayed(const Duration(seconds: 2), () {
       switch (_detectedIntent) {
+        case 'search':
         case 'add_to_cart':
           if (_detectedItems.isNotEmpty) {
-            // Navigate to search page with intent data instead of showing search delegate
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => SearchPage(
-                  searchQuery: _detectedItems.first,
-                  intent: _detectedIntent,
-                  detectedItems: _detectedItems,
-                  sourceLanguage: _languageCode,
-                ),
-              ),
-            );
-          }
-          break;
-        case 'search':
-          if (_detectedItems.isNotEmpty) {
-            // Navigate to search page with intent data instead of showing search delegate
+            // Navigate to search page with intent data
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
@@ -646,6 +683,16 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
               ),
             );
           }
+          break;
+        case 'checkout':
+          // Navigate to cart page with checkout intent
+          Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(builder: (_) => MyCart(
+              isCheckoutIntent: true,
+              sourceLanguage: _languageCode,
+            ))
+          );
           break;
         default:
           // Stay on the same page
@@ -895,6 +942,11 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
         intentIcon = Icons.favorite;
         intentLabel = 'Add to Favorites';
         intentColor = Colors.pink;
+        break;
+      case 'checkout':
+        intentIcon = Icons.payment;
+        intentLabel = 'Checkout';
+        intentColor = Colors.purple;
         break;
       default:
         intentIcon = Icons.question_mark;

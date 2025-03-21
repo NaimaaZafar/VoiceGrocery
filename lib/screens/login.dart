@@ -6,6 +6,8 @@ import 'package:fyp/widgets/button.dart';
 import 'package:fyp/widgets/square_tile.dart';
 import 'package:fyp/widgets/text_field.dart';
 import 'forget.dart';
+import 'package:fyp/screens/admin_dashboard.dart';
+import 'package:fyp/utils/colors.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function()? onTap;
@@ -21,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   void singuserin() async {
-    // Show loading circle
+    // show loading circle
     showDialog(
       context: context,
       builder: (context) {
@@ -31,35 +33,52 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
 
-    try {
-      // Check for empty fields
-      if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-        Navigator.pop(context); // Close the loading dialog
-        ShowErrorMessage("Email and Password cannot be empty");
-        return;
-      }
+    // Check if email and password fields are not empty
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      // Close the loading circle
+      Navigator.pop(context);
+      ShowErrorMessage("Please fill in all fields");
+      return;
+    }
 
-      // Sign in with Firebase
+    try {
+      // sign in
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        email: emailController.text,
+        password: passwordController.text,
       );
 
-
-      // Close the loading dialog
+      // Close the loading circle
       Navigator.pop(context);
 
-      // Navigate to MainPage1
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainPage1()),
-      );
+      // Check if this is an admin account
+      if (emailController.text.trim() == "admin@gmail.com") {
+        // Navigate to admin dashboard
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminDashboard()),
+          (route) => false,
+        );
+      } else {
+        // Navigate to normal user page
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainPage1()),
+          (route) => false,
+        );
+      }
     } on FirebaseAuthException catch (e) {
-      // Close the loading dialog
+      // Close the loading circle
       Navigator.pop(context);
 
       // Show error message
-      ShowErrorMessage(e.message.toString() ?? "An error occurred");
+      if (e.code == 'user-not-found') {
+        ShowErrorMessage("No user found for that email");
+      } else if (e.code == 'wrong-password') {
+        ShowErrorMessage("Wrong password provided for that user");
+      } else {
+        ShowErrorMessage(e.message ?? "An error occurred during sign in");
+      }
     }
   }
 

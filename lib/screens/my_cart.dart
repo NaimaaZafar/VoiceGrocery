@@ -17,11 +17,13 @@ import '../widgets/product_card_add_remove.dart';
 class MyCart extends StatefulWidget {
   final List<String>? itemsToRemove;
   final String? sourceLanguage; // The language detected from voice input
+  final bool isCheckoutIntent; // Flag to indicate checkout intent
   
   const MyCart({
     super.key,
     this.itemsToRemove,
     this.sourceLanguage,
+    this.isCheckoutIntent = false,
   });
 
   @override
@@ -47,6 +49,11 @@ class _MyCartState extends State<MyCart> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.itemsToRemove != null && widget.itemsToRemove!.isNotEmpty) {
         _processItemsToRemove();
+      }
+      
+      // If checkout intent is true, start the checkout process
+      if (widget.isCheckoutIntent) {
+        _startCheckoutProcess();
       }
     });
   }
@@ -174,6 +181,56 @@ class _MyCartState extends State<MyCart> {
     }
   }
 
+  // Start the checkout process
+  void _startCheckoutProcess() {
+    final cartFavoriteProvider = Provider.of<CartFavoriteProvider>(context, listen: false);
+    
+    // Check if cart is empty
+    if (cartFavoriteProvider.cartItems.isEmpty) {
+      _speak('empty_cart');
+      return;
+    }
+    
+    // Select all items in the cart
+    Future.delayed(const Duration(seconds: 1), () {
+      setState(() {
+        selectedItems = List.generate(cartFavoriteProvider.cartItems.length, (index) => true);
+      });
+      
+      // After selecting all items, proceed to checkout
+      Future.delayed(const Duration(seconds: 2), () {
+        // Get the selected Food objects
+        final selectedFoods = cartFavoriteProvider.cartItems.where((food) {
+          final index = cartFavoriteProvider.cartItems.indexOf(food);
+          return selectedItems[index];
+        }).toList();
+
+        // Convert Food objects to Map<String, dynamic>
+        final itemsForCheckout = selectedFoods.map((food) {
+          return {
+            'food': food,
+            'name': food.name,
+            'price': food.price,
+            'quantity': food.quantity,
+            'imagePath': food.imagePath,
+          };
+        }).toList();
+        
+        // Navigate to checkout screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckoutScreen(
+              selectedItems: itemsForCheckout,
+              useVoiceInput: true,
+              sourceLanguage: widget.sourceLanguage,
+            )
+          ),
+        );
+      });
+    });
+  }
+
   void _onItemSelected(int index) {
     setState(() {
       _selectedIndex = index;
@@ -270,10 +327,21 @@ class _MyCartState extends State<MyCart> {
                   return selectedItems[index]; // Check if the item is selected
                 }).toList();
 
+                // Convert Food objects to Map<String, dynamic>
+                final itemsForCheckout = selectedFoods.map((food) {
+                  return {
+                    'food': food,
+                    'name': food.name,
+                    'price': food.price,
+                    'quantity': food.quantity,
+                    'imagePath': food.imagePath,
+                  };
+                }).toList();
+
                 // Pass the selected items to the CheckoutScreen
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CheckoutScreen(selectedItems: selectedFoods)),
+                  MaterialPageRoute(builder: (context) => CheckoutScreen(selectedItems: itemsForCheckout)),
                 );
               },
               text: 'Buy Now',

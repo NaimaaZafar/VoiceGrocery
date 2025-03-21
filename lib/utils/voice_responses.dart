@@ -23,6 +23,14 @@ class VoiceResponses {
       'add_review_confirm': 'Your review has been added.',
       'favorite_starting': 'Searching for items to add to favorites.',
       'favorite_confirm': 'Item has been added to your favorites.',
+      'checkout_starting': 'Starting the checkout process.',
+      'checkout_success': 'Taking you to checkout.',
+      'checkout_name': 'Please say your full name.',
+      'checkout_phone': 'Please say your phone number.',
+      'checkout_address': 'Please say your delivery address.',
+      'checkout_city': 'Please say your city.',
+      'checkout_payment': 'Please tell me your payment method: card payment or cash on delivery.',
+      'checkout_confirm': 'Thank you! Your order has been placed successfully.',
       
       // Error responses
       'item_not_found': 'Sorry, I couldn\'t find that item.',
@@ -52,6 +60,14 @@ class VoiceResponses {
       'add_review_confirm': 'آپ کا جائزہ شامل کر دیا گیا ہے۔',
       'favorite_starting': 'پسندیدہ میں شامل کرنے کے لیے آئٹمز تلاش کی جا رہی ہیں۔',
       'favorite_confirm': 'آئٹم آپ کے پسندیدہ میں شامل کر دیا گیا ہے۔',
+      'checkout_starting': 'چیک آؤٹ کا عمل شروع کیا جا رہا ہے۔',
+      'checkout_success': 'آپ کو چیک آؤٹ پر لے جایا جا رہا ہے۔',
+      'checkout_name': 'براہ کرم اپنا پورا نام بتائیں۔',
+      'checkout_phone': 'براہ کرم اپنا فون نمبر بتائیں۔',
+      'checkout_address': 'براہ کرم اپنا ڈیلیوری ایڈریس بتائیں۔',
+      'checkout_city': 'براہ کرم اپنا شہر بتائیں۔',
+      'checkout_payment': 'براہ کرم اپنی ادائیگی کا طریقہ بتائیں: کارڈ پیمنٹ یا کیش آن ڈیلیوری۔',
+      'checkout_confirm': 'شکریہ! آپ کا آرڈر کامیابی سے درج کر لیا گیا ہے۔',
       
       // Error responses
       'item_not_found': 'معذرت، مجھے وہ آئٹم نہیں مل سکا۔',
@@ -81,6 +97,14 @@ class VoiceResponses {
       'add_review_confirm': 'आपकी समीक्षा जोड़ दी गई है।',
       'favorite_starting': 'पसंदीदा में जोड़ने के लिए आइटम खोजे जा रहे हैं।',
       'favorite_confirm': 'आइटम आपके पसंदीदा में जोड़ दिया गया है।',
+      'checkout_starting': 'चेकआउट प्रक्रिया शुरू की जा रही है।',
+      'checkout_success': 'आपको चेकआउट पर ले जाया जा रहा है।',
+      'checkout_name': 'कृपया अपना पूरा नाम बताएं।',
+      'checkout_phone': 'कृपया अपना फोन नंबर बताएं।',
+      'checkout_address': 'कृपया अपना डिलीवरी पता बताएं।',
+      'checkout_city': 'कृपया अपना शहर बताएं।',
+      'checkout_payment': 'कृपया अपना भुगतान विधि बताएं: कार्ड भुगतान या डिलीवरी पर नकद।',
+      'checkout_confirm': 'धन्यवाद! आपका ऑर्डर सफलतापूर्वक दर्ज कर लिया गया है।',
       
       // Error responses
       'item_not_found': 'क्षमा करें, मुझे वह आइटम नहीं मिला।',
