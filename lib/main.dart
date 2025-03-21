@@ -51,6 +51,9 @@ class VoiceGrocery extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Splashscreen(), // Your splash screen as the initial screen
+        routes: {
+          '/voice': (context) => const VoiceRecognitionScreen(),
+        },
       ),
     );
   }

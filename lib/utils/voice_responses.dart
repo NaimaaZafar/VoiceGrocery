@@ -31,6 +31,8 @@ class VoiceResponses {
       'checkout_city': 'Please say your city.',
       'checkout_payment': 'Please tell me your payment method: card payment or cash on delivery.',
       'checkout_confirm': 'Thank you! Your order has been placed successfully.',
+      'feedback_starting': 'Taking you to the feedback page.',
+      'feedback_confirm': 'Thank you for your feedback!',
       
       // Error responses
       'item_not_found': 'Sorry, I couldn\'t find that item.',
@@ -68,6 +70,8 @@ class VoiceResponses {
       'checkout_city': 'براہ کرم اپنا شہر بتائیں۔',
       'checkout_payment': 'براہ کرم اپنی ادائیگی کا طریقہ بتائیں: کارڈ پیمنٹ یا کیش آن ڈیلیوری۔',
       'checkout_confirm': 'شکریہ! آپ کا آرڈر کامیابی سے درج کر لیا گیا ہے۔',
+      'feedback_starting': 'آپ کو فیدبک پیج پر لے جانے کی جا رہی ہے۔',
+      'feedback_confirm': 'آپ کی فیدبک لطف سے شکریہ!',
       
       // Error responses
       'item_not_found': 'معذرت، مجھے وہ آئٹم نہیں مل سکا۔',
@@ -105,6 +109,8 @@ class VoiceResponses {
       'checkout_city': 'कृपया अपना शहर बताएं।',
       'checkout_payment': 'कृपया अपना भुगतान विधि बताएं: कार्ड भुगतान या डिलीवरी पर नकद।',
       'checkout_confirm': 'धन्यवाद! आपका ऑर्डर सफलतापूर्वक दर्ज कर लिया गया है।',
+      'feedback_starting': 'आपको फीडबैक पेज पर ले जाने की जा रही है।',
+      'feedback_confirm': 'आपकी फीडबैक के लिए धन्यवाद!',
       
       // Error responses
       'item_not_found': 'क्षमा करें, मुझे वह आइटम नहीं मिला।',

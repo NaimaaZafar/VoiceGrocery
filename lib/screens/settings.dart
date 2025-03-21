@@ -77,34 +77,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationsPage()),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () {
-              FirebaseAuth.instance.signOut();
-
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete_forever),
-            title: const Text('Delete Account'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const DeleteAccountPage()),
-              );
-            },
-          ),
+          
+          
           ListTile(
             leading: const Icon(Icons.feedback),
             title: const Text('Send Feedback'),

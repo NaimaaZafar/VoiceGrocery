@@ -19,6 +19,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:fyp/screens/search.dart';
 import 'package:fyp/screens/cart_fav_provider.dart';
+import 'package:fyp/screens/feedback.dart';
 
 class VoiceRecognitionScreen extends StatefulWidget {
   const VoiceRecognitionScreen({super.key});
@@ -377,9 +378,10 @@ The user may speak in English or Urdu but your response should be in English. Re
 5) add a review for an item
 6) favorite an item
 7) checkout items in cart
+8) provide feedback about the app
 
 Return ONLY a valid JSON object with:
-- "intent" field (one of: "add_to_cart", "search", "go_to_cart", "remove_from_cart", "add_review", "favorite", "checkout" or "unknown")
+- "intent" field (one of: "add_to_cart", "search", "go_to_cart", "remove_from_cart", "add_review", "favorite", "checkout", "feedback" or "unknown")
 - "items" array containing any item names mentioned, ALWAYS TRANSLATED TO ENGLISH regardless of the language spoken
 
 Examples:
@@ -401,6 +403,10 @@ English: "I want to checkout my cart" → {"intent": "checkout", "items": []}
 English: "Proceed to checkout" → {"intent": "checkout", "items": []}
 Urdu: "میں چیک آؤٹ کرنا چاہتا ہوں" → {"intent": "checkout", "items": []}
 Urdu: "ادائیگی کے لیے آگے بڑھیں" → {"intent": "checkout", "items": []}
+English: "I want to give feedback about the app" → {"intent": "feedback", "items": []}
+English: "I have some feedback to share" → {"intent": "feedback", "items": []}
+Urdu: "میں ایپ کے بارے میں تاثرات دینا چاہتا ہوں" → {"intent": "feedback", "items": []}
+Urdu: "مجھے کچھ فیڈبیک دینا ہے" → {"intent": "feedback", "items": []}
 
 Common grocery items in Urdu and their English translations:
 - سیب = apple
@@ -543,6 +549,8 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
                 textToCheck.contains('purchase') || 
                 textToCheck.contains('buy now')) {
         intent = 'checkout';
+      } else if (textToCheck.contains('feedback')) {
+        intent = 'feedback';
       }
       
       // Try to extract items using regex
@@ -607,6 +615,9 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
         break;
       case 'checkout':
         _speak('checkout_starting');
+        break;
+      case 'feedback':
+        _speak('feedback_starting');
         break;
     }
 
@@ -690,6 +701,16 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
             context, 
             MaterialPageRoute(builder: (_) => MyCart(
               isCheckoutIntent: true,
+              sourceLanguage: _languageCode,
+            ))
+          );
+          break;
+        case 'feedback':
+          // Navigate to feedback page with voice feedback intent
+          Navigator.pushReplacement(
+            context, 
+            MaterialPageRoute(builder: (_) => SendFeedbackPage(
+              isVoiceFeedbackIntent: true,
               sourceLanguage: _languageCode,
             ))
           );
@@ -947,6 +968,11 @@ IMPORTANT: Your response must be a valid JSON object and nothing else. No explan
         intentIcon = Icons.payment;
         intentLabel = 'Checkout';
         intentColor = Colors.purple;
+        break;
+      case 'feedback':
+        intentIcon = Icons.feedback;
+        intentLabel = 'Add Feedback';
+        intentColor = Colors.teal;
         break;
       default:
         intentIcon = Icons.question_mark;

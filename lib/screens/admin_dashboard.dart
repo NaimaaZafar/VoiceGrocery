@@ -6,7 +6,7 @@ import 'package:fyp/screens/login.dart';
 import 'package:fyp/screens/admin_products.dart';
 import 'package:fyp/screens/admin_users.dart';
 import 'package:fyp/screens/admin_reviews.dart';
-import 'package:fyp/screens/admin_orders.dart';
+import 'package:fyp/screens/admin_feedback.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -77,14 +77,14 @@ class AdminDashboard extends StatelessWidget {
                     ),
                     _buildDashboardCard(
                       context,
-                      'Orders',
-                      Icons.receipt_long,
-                      Colors.orange,
+                      'App Feedback',
+                      Icons.feedback,
+                      Colors.purple,
                       () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AdminOrdersPage(),
+                            builder: (context) => const AdminFeedbackPage(),
                           ),
                         );
                       },
@@ -213,14 +213,14 @@ class AdminDashboard extends StatelessWidget {
               },
             ),
             StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('reviews').snapshots(),
+              stream: FirebaseFirestore.instance.collection('feedback').snapshots(),
               builder: (context, snapshot) {
                 int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
                 return _buildStatItem(
-                  Icons.star,
+                  Icons.feedback,
                   count.toString(),
-                  'Reviews',
-                  Colors.amber,
+                  'Feedback',
+                  Colors.purple,
                 );
               },
             ),

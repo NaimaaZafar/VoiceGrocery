@@ -266,35 +266,69 @@ class ItemDetailsPageState extends State<ItemDetailsPage> {
   void submitReview() async {
     String reviewText = reviewController.text.trim();
     if (reviewText.isNotEmpty) {
-      // Check if the text contains our language marker
-      String detectedLanguage = widget.sourceLanguage;
-      
-      if (reviewText.contains("|||")) {
-        final parts = reviewText.split("|||");
-        reviewText = parts[0].trim();
-        if (parts.length > 1) {
-          detectedLanguage = parts[1].trim();
+      try {
+        // Check if the text contains our language marker
+        String detectedLanguage = widget.sourceLanguage;
+        
+        if (reviewText.contains("|||")) {
+          final parts = reviewText.split("|||");
+          reviewText = parts[0].trim();
+          if (parts.length > 1) {
+            detectedLanguage = parts[1].trim();
+          }
         }
-      }
-      
-      await firestore.collection('reviews').add({
-        'productName': widget.title,
-        'review': reviewText,
-        'language': detectedLanguage,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+        
+        // Create the review data
+        Map<String, dynamic> reviewData = {
+          'productName': widget.title,
+          'review': reviewText,
+          'language': detectedLanguage,
+          'timestamp': FieldValue.serverTimestamp(),
+        };
+        
+        // Print debug info before saving
+        print("Submitting review - Data: $reviewData");
+        
+        // Add the review document to Firestore
+        DocumentReference docRef = await firestore.collection('reviews').add(reviewData);
+        
+        print("Review submitted successfully with ID: ${docRef.id}");
 
-      reviewController.clear();
-      
-      if (_isVoiceReviewActive) {
-        // Speak confirmation for voice review in the detected language
-        _speak('add_review_confirm');
-      } else {
-        // Show snackbar for manual review
+        // Clear the input field
+        reviewController.clear();
+        
+        if (_isVoiceReviewActive) {
+          // Speak confirmation for voice review in the detected language
+          _speak('add_review_confirm');
+        } else {
+          // Show snackbar for manual review
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Review submitted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        
+        // Refresh the reviews list by triggering a setState
+        setState(() {});
+      } catch (e) {
+        // Show error message if submission fails
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Review submitted!')),
+          SnackBar(
+            content: Text('Error submitting review: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
+    } else {
+      // Notify user if review text is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a review before submitting'),
+          backgroundColor: Colors.orange,
+        ),
+      );
     }
   }
   
@@ -391,20 +425,48 @@ class ItemDetailsPageState extends State<ItemDetailsPage> {
                 // Reviews Section
                 ExpansionTile(
                   initiallyExpanded: widget.isReviewIntent,
+                  key: GlobalKey(), // Add a key to force rebuild
                   title: const Text("Reviews"),
                   children: [
                     StreamBuilder<QuerySnapshot>(
                       stream: firestore.collection('reviews')
                           .where('productName', isEqualTo: widget.title)
-                          .orderBy('timestamp', descending: true)
+                          // Removing orderBy clause temporarily until index is created
+                          //.orderBy('timestamp', descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {
+                        // Print debug information
+                        print("Reviews debug - Product name: ${widget.title}");
+                        print("Reviews debug - Has data: ${snapshot.hasData}");
+                        if (snapshot.hasData) {
+                          print("Reviews debug - Number of reviews: ${snapshot.data!.docs.length}");
+                          for (var doc in snapshot.data!.docs) {
+                            var data = doc.data() as Map<String, dynamic>;
+                            print("Reviews debug - Review data: $data");
+                          }
+                        }
+                        
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text("Error loading reviews: ${snapshot.error}", 
+                                style: const TextStyle(fontSize: 16)),
+                          );
+                        }
+
                         if (!snapshot.hasData) {
                           return const Padding(
                             padding: EdgeInsets.all(10.0),
                             child: Text("No reviews yet", style: TextStyle(fontSize: 16)),
                           );
                         }
+                        
                         var reviews = snapshot.data!.docs;
                         if (reviews.isEmpty) {
                           return const Padding(
@@ -412,15 +474,15 @@ class ItemDetailsPageState extends State<ItemDetailsPage> {
                             child: Text("No reviews yet", style: TextStyle(fontSize: 16)),
                           );
                         }
+                        
                         return Column(
                           children: reviews.map((doc) {
                             var reviewData = doc.data() as Map<String, dynamic>;
-                            
                             return ListTile(
-                              title: Text(reviewData['review']),
+                              title: Text(reviewData['review'] ?? ""),
                               subtitle: Text(
                                 reviewData['timestamp'] != null
-                                    ? reviewData['timestamp'].toDate().toString()
+                                    ? reviewData['timestamp'].toDate().toString().substring(0, 16)
                                     : 'Just now',
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
