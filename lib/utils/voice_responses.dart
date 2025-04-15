@@ -9,6 +9,12 @@ class VoiceResponses {
       'command_understood': 'I understood your command.',
       'command_not_understood': 'Sorry, I didn\'t understand that command.',
       
+      // Assistant specific responses
+      'assistant_ready': 'I\'m here to help. What would you like me to do?',
+      'general_response': 'I\'m your voice assistant. You can ask me to search for products, check your cart, or navigate to different sections of the app.',
+      'going_to_settings': 'Taking you to the settings page.',
+      'going_to_profile': 'Opening your profile page.',
+      
       // Intent responses
       'add_to_cart_success': 'Adding items to your cart.',
       'add_to_cart_confirm': 'Items have been added to your cart.',
@@ -48,6 +54,12 @@ class VoiceResponses {
       'command_understood': 'میں نے آپ کا حکم سمجھ لیا ہے۔',
       'command_not_understood': 'معذرت، مجھے وہ حکم سمجھ نہیں آیا۔',
       
+      // Assistant specific responses
+      'assistant_ready': 'میں آپ کی مدد کے لیے حاضر ہوں۔ آپ مجھ سے کیا کروانا چاہتے ہیں؟',
+      'general_response': 'میں آپ کا وائس اسسٹنٹ ہوں۔ آپ مجھ سے پروڈکٹس کی تلاش، اپنی کارٹ چیک کرنے، یا ایپ کے مختلف حصوں میں جانے کے لیے کہہ سکتے ہیں۔',
+      'going_to_settings': 'آپ کو سیٹنگز پیج پر لے جایا جا رہا ہے۔',
+      'going_to_profile': 'آپ کا پروفائل پیج کھولا جا رہا ہے۔',
+      
       // Intent responses
       'add_to_cart_success': 'آپ کی ٹوکری میں اشیاء شامل کی جا رہی ہیں۔',
       'add_to_cart_confirm': 'آئٹمز آپ کی ٹوکری میں شامل کر دیے گئے ہیں۔',
@@ -86,6 +98,12 @@ class VoiceResponses {
       'processing': 'आपके अनुरोध पर कार्रवाई की जा रही है...',
       'command_understood': 'मैंने आपका कमांड समझ लिया है।',
       'command_not_understood': 'क्षमा करें, मुझे वह कमांड समझ नहीं आया।',
+      
+      // Assistant specific responses
+      'assistant_ready': 'मैं आपकी मदद के लिए मौजूद हूँ। आप मुझसे क्या करवाना चाहते हैं?',
+      'general_response': 'मैं आपका वॉइस असिस्टेंट हूँ। आप मुझसे प्रोडक्ट्स खोजने, अपनी कार्ट चेक करने, या ऐप के विभिन्न भागों में जाने के लिए कह सकते हैं।',
+      'going_to_settings': 'आपको सेटिंग्स पेज पर ले जा रहा हूँ।',
+      'going_to_profile': 'आपका प्रोफाइल पेज खोला जा रहा है।',
       
       // Intent responses
       'add_to_cart_success': 'आइटम आपकी कार्ट में जोड़े जा रहे हैं।',

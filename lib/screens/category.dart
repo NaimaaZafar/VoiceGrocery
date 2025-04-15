@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fyp/screens/search.dart';
 import 'package:fyp/screens/settings.dart';
 import 'package:fyp/utils/get_user_name.dart';
+import 'package:fyp/widgets/app_scaffold.dart';
 import 'package:fyp/widgets/my_drawer.dart';
 import 'package:fyp/widgets/my_sliver_app_bar.dart';
 import 'package:fyp/widgets/navbar.dart';
