@@ -42,7 +42,7 @@ class _DealsScreenState extends State<DealsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const CategoryScreen(categoryName: '')),
+                    builder: (context) => const CategoryScreen(categoryName: 'FreshFruits')),
               );
             },
             child: const Padding(

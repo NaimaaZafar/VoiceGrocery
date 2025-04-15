@@ -9,6 +9,7 @@ import 'package:fyp/screens/cart_fav_provider.dart';
 import 'package:fyp/utils/food_menu.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fyp/screens/voice_recognition.dart';
+import 'dart:io';
 
 Future<void> main() async {
   final WidgetsBinding widgetsBining =
@@ -19,9 +20,13 @@ Future<void> main() async {
     await dotenv.load(fileName: ".env");
     print("Environment variables loaded successfully");
     print("OPENAI_API_KEY exists: ${dotenv.env.containsKey('OPENAI_API_KEY')}");
+    if (!dotenv.env.containsKey('OPENAI_API_KEY')) {
+      print("Warning: OPENAI_API_KEY is not set in .env file");
+    }
   } catch (e) {
     // If the .env file doesn't exist or can't be loaded, we'll continue with a fallback
     print("Warning: Unable to load .env file: $e");
+    print("Current working directory: ${Directory.current.path}");
   }
   
   await Firebase.initializeApp(

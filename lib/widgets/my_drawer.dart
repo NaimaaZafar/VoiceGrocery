@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fyp/screens/settings.dart';
+import 'package:fyp/screens/logout.dart';
 import 'package:fyp/widgets/my_drawer_tile.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -33,7 +34,10 @@ class MyDrawer extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen(),));
             }),
             const Spacer(),
-            MyDrawerTile(text: 'L O G O U T', icon: Icons.logout, onTap: () {}),
+            MyDrawerTile(text: 'L O G O U T', icon: Icons.logout, onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const LogoutPage()));
+            }),
             const SizedBox(height: 30),
           ],
         ),

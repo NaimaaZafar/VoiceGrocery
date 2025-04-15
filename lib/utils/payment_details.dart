@@ -11,9 +11,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fyp/utils/food_menu.dart';
 
 class PaymentDetailsScreen extends StatefulWidget {
-  const PaymentDetailsScreen({super.key});
+  final Map<String, dynamic> orderDetails;
+  
+  const PaymentDetailsScreen({
+    super.key,
+    required this.orderDetails,
+  });
 
   @override
   State<PaymentDetailsScreen> createState() => _PaymentDetailsScreenState();
@@ -21,32 +29,103 @@ class PaymentDetailsScreen extends StatefulWidget {
 
 class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
   String? _selectedPaymentMethod;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> _saveOrder() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to place an order')),
+        );
+        return;
+      }
+
+      // Format items for Firestore
+      List<Map<String, dynamic>> formattedItems = [];
+      for (var item in widget.orderDetails['items']) {
+        // Check if item is a Food object
+        if (item is Food) {
+          formattedItems.add({
+            'name': item.name,
+            'price': item.price,
+            'quantity': item.quantity,
+            'imagePath': item.imagePath,
+            'descriptions': item.descriptions,
+            'category': item.category.toString(),
+          });
+        } else if (item is Map<String, dynamic>) {
+          // Handle if item is already a map
+          formattedItems.add({
+            'name': item['name'] ?? '',
+            'price': item['price'] ?? 0,
+            'quantity': item['quantity'] ?? 1,
+            'imagePath': item['imagePath'] ?? '',
+            'descriptions': item['descriptions'] ?? {},
+            'category': item['category'] ?? '',
+          });
+        }
+      }
+
+      // Create order data using the passed details
+      final orderData = {
+        'userId': user.uid,
+        'customerName': widget.orderDetails['customerName'],
+        'email': user.email,
+        'phoneNumber': widget.orderDetails['phoneNumber'],
+        'province': widget.orderDetails['province'],
+        'city': widget.orderDetails['city'],
+        'address': widget.orderDetails['address'],
+        'postalCode': widget.orderDetails['postalCode'],
+        'items': formattedItems,
+        'totalAmount': widget.orderDetails['totalAmount'],
+        'status': 'Pending',
+        'paymentMethod': _selectedPaymentMethod,
+        'timestamp': FieldValue.serverTimestamp(),
+        'orderDate': DateTime.now(),
+      };
+
+      // Save the order to Firestore
+      await _firestore.collection('orders').add(orderData);
+
+      // Navigate to success screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SuccessScreen(),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving order: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: bg_dark, // Blue background
+      backgroundColor: bg_dark,
       appBar: AppBar(
-        backgroundColor: bg_dark, // Consistent AppBar color
-        title: const Text('Payment Details', style: TextStyle(color: Colors.white),),
-        elevation: 0, // Flat AppBar
+        backgroundColor: bg_dark,
+        title: const Text('Payment Details', style: TextStyle(color: Colors.white)),
+        elevation: 0,
       ),
       body: Column(
-        mainAxisAlignment:
-        MainAxisAlignment.center, // Center content vertically
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text(
             'Select Payment Method',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white, // White text for contrast
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 20),
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceEvenly, // Space between options
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildPaymentOption(
                 icon: Icons.money,
@@ -60,33 +139,28 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 40), // Space between options and button
-            Button(
-              onTap: () {
-                if (_selectedPaymentMethod == 'Credit Card') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AddCardScreen(),
-                    ),
-                  );
-                } else if (_selectedPaymentMethod == 'COD') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SuccessScreen(),
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select a payment method'),
-                    ),
-                  );
-                }
-              },
-              text: "NEXT",
-            ),
+          const SizedBox(height: 40),
+          Button(
+            onTap: () async {
+              if (_selectedPaymentMethod == 'Credit Card') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddCardScreen(),
+                  ),
+                );
+              } else if (_selectedPaymentMethod == 'COD') {
+                await _saveOrder(); // Save order before navigating
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please select a payment method'),
+                  ),
+                );
+              }
+            },
+            text: "NEXT",
+          ),
         ],
       ),
     );
@@ -138,9 +212,11 @@ class _PaymentDetailsScreenState extends State<PaymentDetailsScreen> {
 class VoicePaymentDetailsScreen extends StatefulWidget {
   final bool useVoiceInput;
   final String? sourceLanguage;
+  final Map<String, dynamic> orderDetails;
   
   const VoicePaymentDetailsScreen({
     super.key, 
+    required this.orderDetails,
     this.useVoiceInput = false,
     this.sourceLanguage,
   });
@@ -152,12 +228,85 @@ class VoicePaymentDetailsScreen extends StatefulWidget {
 class _VoicePaymentDetailsScreenState extends State<VoicePaymentDetailsScreen> {
   final _audioRecorder = AudioRecorder();
   final _ttsService = TextToSpeechService();
-  String _languageCode = 'en'; // Default language
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String _languageCode = 'en';
   
   String? _selectedPaymentMethod;
   bool _isRecording = false;
   String _recordingPath = '';
   bool _processingVoice = false;
+
+  Future<void> _saveOrder() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to place an order')),
+        );
+        return;
+      }
+
+      // Format items for Firestore
+      List<Map<String, dynamic>> formattedItems = [];
+      for (var item in widget.orderDetails['items']) {
+        // Check if item is a Food object
+        if (item is Food) {
+          formattedItems.add({
+            'name': item.name,
+            'price': item.price,
+            'quantity': item.quantity,
+            'imagePath': item.imagePath,
+            'descriptions': item.descriptions,
+            'category': item.category.toString(),
+          });
+        } else if (item is Map<String, dynamic>) {
+          // Handle if item is already a map
+          formattedItems.add({
+            'name': item['name'] ?? '',
+            'price': item['price'] ?? 0,
+            'quantity': item['quantity'] ?? 1,
+            'imagePath': item['imagePath'] ?? '',
+            'descriptions': item['descriptions'] ?? {},
+            'category': item['category'] ?? '',
+          });
+        }
+      }
+
+      // Create order data using the passed details
+      final orderData = {
+        'userId': user.uid,
+        'customerName': widget.orderDetails['customerName'],
+        'email': user.email,
+        'phoneNumber': widget.orderDetails['phoneNumber'],
+        'province': widget.orderDetails['province'],
+        'city': widget.orderDetails['city'],
+        'address': widget.orderDetails['address'],
+        'postalCode': widget.orderDetails['postalCode'],
+        'items': formattedItems,
+        'totalAmount': widget.orderDetails['totalAmount'],
+        'status': 'Pending',
+        'paymentMethod': _selectedPaymentMethod,
+        'timestamp': FieldValue.serverTimestamp(),
+        'orderDate': DateTime.now(),
+      };
+
+      // Save the order to Firestore
+      await _firestore.collection('orders').add(orderData);
+
+      // Navigate to success screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SuccessScreen(),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving order: $e')),
+      );
+    }
+  }
   
   @override
   void initState() {
@@ -369,7 +518,7 @@ class _VoicePaymentDetailsScreenState extends State<VoicePaymentDetailsScreen> {
   }
   
   // Proceed with the selected payment method
-  void _proceedWithPayment() {
+  void _proceedWithPayment() async {
     if (_selectedPaymentMethod == 'Credit Card') {
       Navigator.push(
         context,
@@ -378,12 +527,7 @@ class _VoicePaymentDetailsScreenState extends State<VoicePaymentDetailsScreen> {
         ),
       );
     } else if (_selectedPaymentMethod == 'COD') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SuccessScreen(),
-        ),
-      );
+      await _saveOrder();
     }
   }
   

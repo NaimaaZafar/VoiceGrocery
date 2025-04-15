@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fyp/screens/adminBhai.dart';
+import 'package:fyp/screens/admin_dashboard.dart';
 import 'package:fyp/screens/mainpage1.dart';
 import 'login_or_reg.dart';
 
@@ -34,8 +34,13 @@ class _WrapperState extends State<Wrapper> {
           // User is logged in
           if (snapshot.hasData) {
             User? user = snapshot.data;
+            
+            // Check if user is admin by email first (for quicker response)
+            if (user?.email == 'admin@gmail.com') {
+              return const AdminDashboard();
+            }
 
-            // Fetch user role or additional data if needed
+            // For other users, fetch additional data from Firestore
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance.collection('users').doc(user?.uid).get(),
               builder: (context, userSnapshot) {
@@ -45,15 +50,16 @@ class _WrapperState extends State<Wrapper> {
                 if (userSnapshot.hasError) {
                   return Center(child: Text('Error loading user data.'));
                 }
-                if (userSnapshot.hasData) {
+                if (userSnapshot.hasData && userSnapshot.data!.exists) {
                   var userData = userSnapshot.data!.data() as Map<String, dynamic>;
                   if (userData['role'] == 'admin') {
-                    return AdminPage();
+                    return const AdminDashboard();
                   } else {
-                    return MainPage1();
+                    return const MainPage1();
                   }
                 }
-                return const LoginOrRegister();
+                // If we couldn't get user data but user is authenticated, still show main page
+                return const MainPage1();
               },
             );
           }

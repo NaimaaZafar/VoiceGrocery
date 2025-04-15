@@ -7,6 +7,7 @@ import 'package:fyp/screens/admin_products.dart';
 import 'package:fyp/screens/admin_users.dart';
 import 'package:fyp/screens/admin_reviews.dart';
 import 'package:fyp/screens/admin_feedback.dart';
+import 'package:fyp/screens/admin_orders.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({Key? key}) : super(key: key);
@@ -77,14 +78,14 @@ class AdminDashboard extends StatelessWidget {
                     ),
                     _buildDashboardCard(
                       context,
-                      'App Feedback',
-                      Icons.feedback,
-                      Colors.purple,
+                      'Orders',
+                      Icons.shopping_cart_checkout,
+                      Colors.orange,
                       () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const AdminFeedbackPage(),
+                            builder: (context) => const AdminOrdersPage(),
                           ),
                         );
                       },
@@ -99,6 +100,20 @@ class AdminDashboard extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const AdminUsersPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildDashboardCard(
+                      context,
+                      'App Feedback',
+                      Icons.feedback,
+                      Colors.purple,
+                      () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AdminFeedbackPage(),
                           ),
                         );
                       },
@@ -209,6 +224,18 @@ class AdminDashboard extends StatelessWidget {
                   count.toString(),
                   'Users',
                   Colors.green,
+                );
+              },
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('orders').snapshots(),
+              builder: (context, snapshot) {
+                int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                return _buildStatItem(
+                  Icons.shopping_cart_checkout,
+                  count.toString(),
+                  'Orders',
+                  Colors.orange,
                 );
               },
             ),

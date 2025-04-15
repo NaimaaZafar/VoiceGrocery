@@ -280,13 +280,27 @@ class _CheckoutDetailsState extends State<CheckoutDetails> {
       _postalCodeController.text = '12345';
     }
     
+    final orderDetails = {
+      'items': widget.selectedItems,
+      'totalAmount': widget.totalPrice,
+      'customerName': _fullNameController.text,
+      'phoneNumber': _phoneNumberController.text,
+      'province': _selectedProvince,
+      'city': _cityController.text,
+      'address': _addressController.text,
+      'postalCode': _postalCodeController.text,
+    };
+    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VoicePaymentDetailsScreen(
-          useVoiceInput: widget.useVoiceInput,
-          sourceLanguage: _languageCode,
-        ),
+        builder: (context) => widget.useVoiceInput
+          ? VoicePaymentDetailsScreen(
+              orderDetails: orderDetails,
+              useVoiceInput: true,
+              sourceLanguage: widget.sourceLanguage,
+            )
+          : PaymentDetailsScreen(orderDetails: orderDetails),
       ),
     );
   }
@@ -400,15 +414,29 @@ class _CheckoutDetailsState extends State<CheckoutDetails> {
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
+                        
+                        // Create order details from form data
+                        final orderDetails = {
+                          'items': widget.selectedItems,
+                          'totalAmount': widget.totalPrice,
+                          'customerName': _fullNameController.text,
+                          'phoneNumber': _phoneNumberController.text,
+                          'province': _selectedProvince,
+                          'city': _cityController.text,
+                          'address': _addressController.text,
+                          'postalCode': _postalCodeController.text,
+                        };
+                        
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => widget.useVoiceInput 
                               ? VoicePaymentDetailsScreen(
+                                  orderDetails: orderDetails,
                                   useVoiceInput: true,
                                   sourceLanguage: widget.sourceLanguage,
                                 )
-                              : const PaymentDetailsScreen(),
+                              : PaymentDetailsScreen(orderDetails: orderDetails),
                           ),
                         );
                       }

@@ -22,7 +22,7 @@ class _SplashscreenState extends State<Splashscreen> {
     Timer(Duration(seconds: 3),(){
       Navigator.pushReplacement(
           context, MaterialPageRoute(
-        builder: (context) => VirtualGuidescreen(),
+        builder: (context) => Wrapper(),
       ));
     });
   }

@@ -316,7 +316,7 @@ class _MyCartState extends State<MyCart> {
           ),
           // "Buy Now" Button
           Positioned(
-            bottom: 60,
+            bottom: 100,
             left: 16,
             right: 16,
             child: Button(

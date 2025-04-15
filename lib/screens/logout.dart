@@ -1,24 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fyp/screens/wrapper.dart';
+import 'package:get_storage/get_storage.dart';
 
 class LogoutPage extends StatelessWidget {
   const LogoutPage({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    try {
+      // Sign out from Firebase
+      await FirebaseAuth.instance.signOut();
+      
+      // Clear local storage
+      final box = GetStorage();
+      await box.erase();
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Successfully logged out')),
+      );
+      
+      // Navigate to wrapper which will handle the auth state
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Wrapper()),
+        (route) => false,
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error logging out: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Logout'),
+        backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+          children: [ 
             // Image symbol for logout
             Image.asset(
-              'assets/logout_icon.png', // Replace with your image path
-              height: 100, // Adjust the size as needed
-              width: 100, // Adjust the size as needed
+              'asset/logout_icon.png',
+              height: 100,
+              width: 100,
             ),
             const SizedBox(height: 20),
 
@@ -32,22 +64,17 @@ class LogoutPage extends StatelessWidget {
 
             // Logout button
             ElevatedButton(
-              onPressed: () {
-                // Handle Logout action (e.g., navigate to login page)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('You have been logged out.')),
-                );
-                // Example: Navigate to login page
-                // Navigator.pushReplacementNamed(context, '/login');
-              },
+              onPressed: () => _logout(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // Dark blue background
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
               ),
               child: const Text(
                 'Logout',
                 style: TextStyle(
-                    fontSize: 18, color: Colors.red), // Red text color
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
