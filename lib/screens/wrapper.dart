@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fyp/screens/admin_dashboard.dart';
+import 'package:fyp/screens/category.dart';
 import 'package:fyp/screens/mainpage1.dart';
 import 'login_or_reg.dart';
 
@@ -55,11 +56,12 @@ class _WrapperState extends State<Wrapper> {
                   if (userData['role'] == 'admin') {
                     return const AdminDashboard();
                   } else {
-                    return const MainPage1();
+                    // Navigate directly to CategoryScreen for regular users
+                    return const CategoryScreen(categoryName: '');
                   }
                 }
-                // If we couldn't get user data but user is authenticated, still show main page
-                return const MainPage1();
+                // If we couldn't get user data but user is authenticated, still go to CategoryScreen
+                return const CategoryScreen(categoryName: '');
               },
             );
           }

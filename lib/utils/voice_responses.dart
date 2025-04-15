@@ -14,6 +14,7 @@ class VoiceResponses {
       'general_response': 'I\'m your voice assistant. You can ask me to search for products, check your cart, or navigate to different sections of the app.',
       'going_to_settings': 'Taking you to the settings page.',
       'going_to_profile': 'Opening your profile page.',
+      'going_to_home': 'Taking you to the home page.',
       
       // Intent responses
       'add_to_cart_success': 'Adding items to your cart.',

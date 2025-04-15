@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fyp/screens/login.dart';
 import 'package:fyp/screens/signup.dart';
+import 'package:fyp/screens/wrapper.dart';
 import 'package:fyp/utils/colors.dart';
 import 'package:lottie/lottie.dart';
 
@@ -17,11 +18,11 @@ class _VirtualGuidescreenState extends State<VirtualGuidescreen> {
   void initState() {
     super.initState();
 
-    // Timer to navigate after 30 seconds
+    // Timer to navigate after 5 seconds
     Timer(const Duration(seconds: 05), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen(onTap: null)),
+        MaterialPageRoute(builder: (context) => const Wrapper()),
       );
     });
   }
